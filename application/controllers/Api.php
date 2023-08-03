@@ -110,13 +110,17 @@ class Api extends RestController
   public function dana_sosial_post()
   {
     $nama = $this->post('nama');
-    $jumlah = $this->post('jumlah');
+    $jumlah = $this->post('jumlah') == '' ? null : $this->post('jumlah');
     $tanggal = $this->post('tanggal');
+    $ket = $this->post('ket') == '' ? null : $this->post('ket');
+    $jenis = $this->post('jenis');
 
     $array = [
       'nama' => $nama,
       'jumlah' => $jumlah,
       'tanggal' => $tanggal,
+      'ket' => $ket,
+      'jenis' => $jenis
     ];
 
     $this->model->insert('tb_dana_sosial', $array);
@@ -129,6 +133,37 @@ class Api extends RestController
   {
     $data = $this->model->tampil_data_keseluruhan('tb_dana_sosial')->result();
     $this->response(['message' => 'ini untuk dana sosial get', 'status' => true , 'data' => $data], 200);
+
+  }
+
+  public function dana_sosial_detail_get()
+  {
+    $id = $this->get('id');
+    $data = $this->model->tampil_data_where('tb_dana_sosial', ['id_dana_sosial' => $id])->result();
+    if (count($data) == 0) return $this->response(['message' => 'data tidak ditemukan', 'status' => false], 400);
+    $this->response(['message' => 'ini untuk dana sosial get', 'status' => true , 'data' => $data[0]], 200);
+
+  }
+
+
+  public function filter_dana_post(){
+    $sql = $this->post('sql');
+
+    $data = $this->model->custom_query($sql)->result();
+
+    $this->response(['message' => 'ini untuk filter dana', 'status' => true , 'data' => $data], 200);
+  }
+
+  public function dana_sosial_ttd_post()
+  {
+    $id = $this->post('id');
+    $cek_data = $this->model->tampil_data_where('tb_dana_sosial', ['id_dana_sosial' => $id])->result();
+
+    if (count($cek_data) == 0) return $this->response(['message' => 'data tidak ditemukan', 'status' => false], 400);
+
+    $this->model->update('tb_dana_sosial', ['id_dana_sosial' => $id], ['status' => 1]);
+
+    $this->response(['message' => 'ini untuk dana sosial ttd', 'status' => true], 200);
 
   }
   
