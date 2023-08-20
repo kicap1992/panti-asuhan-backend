@@ -103,21 +103,40 @@ class Api extends RestController
     $this->response(['message' => 'ini untuk siswa get', 'status' => true, 'data' => $data[0]], 200);
   }
 
+  // siswa delete
+  public function siswa_delete_post()
+  {
+    $id = $this->post('id');
+    $cek_data = $this->model->tampil_data_where('tb_siswa', ['id_siswa' => $id])->result();
+    if (count($cek_data) == 0) return $this->response(['message' => 'data tidak ditemukan', 'status' => false], 400);
+    // delete the folder
+    $upload_dir = 'assets/siswa/' . $id . '/';
+    if (is_dir($upload_dir)) {
+      array_map('unlink', glob("$upload_dir/*.*"));
+      rmdir($upload_dir);
+    }
+    $this->model->delete('tb_siswa', ['id_siswa' => $id]);
+    
+    $this->response(['message' => 'ini untuk siswa delete', 'status' => true], 200);
+  }
+
 
   public function dana_sosial_post()
   {
-    $nama = $this->post('nama');
+    $nama = $this->post('nama') == '' ? null : $this->post('nama');
     $jumlah = $this->post('jumlah') == '' ? null : $this->post('jumlah');
     $tanggal = $this->post('tanggal');
     $ket = $this->post('ket') == '' ? null : $this->post('ket');
     $jenis = $this->post('jenis');
+    $bentuk = $this->post('bentuk');
 
     $array = [
       'nama' => $nama,
       'jumlah' => $jumlah,
       'tanggal' => $tanggal,
       'ket' => $ket,
-      'jenis' => $jenis
+      'jenis' => $jenis,
+      'bentuk' => $bentuk
     ];
 
     $this->model->insert('tb_dana_sosial', $array);
@@ -209,5 +228,11 @@ class Api extends RestController
 
 
     $this->response(['message' => $cek_data, 'status' => true], 200);
+  }
+
+  public function jabatan_get(){
+    $jabatan = $this->get('jabatan');
+    $data = $this->model->tampil_data_where('tb_jabatan', ['jabatan' => $jabatan])->result();
+    $this->response(['message' => 'ini untuk jabatan get', 'status' => true, 'data' => $data], 200);
   }
 }
